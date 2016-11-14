@@ -1,7 +1,6 @@
 package scheduler
 
 import (
-	"flag"
 	"io/ioutil"
 	"net"
 	"os"
@@ -114,7 +113,7 @@ func (sched *Scheduler) Disconnected(sched.SchedulerDriver) {
 
 func (sched *Scheduler) ResourceOffers(driver sched.SchedulerDriver, offers []*mesos.Offer) {
 
-	if (sched.tasksLaunched - sched.tasksErrored) >= 5 {
+	if (sched.tasksLaunched - sched.tasksErrored) >= 1 {
 		log.Info("decline all of the offers since all of our tasks are already launched")
 		ids := make([]*mesos.OfferID, len(offers))
 		for i, offer := range offers {
@@ -171,6 +170,16 @@ func (sched *Scheduler) ResourceOffers(driver sched.SchedulerDriver, offers []*m
 					util.NewScalarResource("cpus", CPUS_PER_TASK),
 					util.NewScalarResource("mem", MEM_PER_TASK),
 				},
+				Command: &mesos.CommandInfo{
+					Shell: proto.Bool(false),
+					User:  proto.String("root"),
+				},
+				Container: &mesos.ContainerInfo{
+					Type: mesos.ContainerInfo_DOCKER.Enum(),
+					Docker: &mesos.ContainerInfo_DockerInfo{
+						Image: proto.String("nginx:latest"),
+					},
+				},
 			}
 			log.Infof("Prepared task: %s with offer %s for launch\n", task.GetName(), offer.Id.GetValue())
 
@@ -219,74 +228,6 @@ func (sched *Scheduler) Error(_ sched.SchedulerDriver, err string) {
 	log.Errorf("Scheduler received error: %v", err)
 }
 
-// ----------------------- func init() ------------------------- //
-
-func init() {
-	flag.Parse()
-	log.Infof("Initializing the Example Scheduler...")
-}
-
-// returns (downloadURI, basename(path))
-/*
-func serveExecutorArtifact(path string) (*string, string) {
-	serveFile := func(pattern string, filename string) {
-		http.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
-			http.ServeFile(w, r, filename)
-		})
-	}
-
-	// Create base path (http://foobar:5000/<base>)
-	pathSplit := strings.Split(path, "/")
-	var base string
-	if len(pathSplit) > 0 {
-		base = pathSplit[len(pathSplit)-1]
-	} else {
-		base = path
-	}
-	serveFile("/"+base, path)
-
-	hostURI := fmt.Sprintf("http://%s:%d/%s", *address, *artifactPort, base)
-	log.Infof("Hosting artifact '%s' at '%s'", path, hostURI)
-
-	return &hostURI, base
-}
-
-func prepareExecutorInfo() *mesos.ExecutorInfo {
-	executorUris := []*mesos.CommandInfo_URI{}
-	uri, executorCmd := serveExecutorArtifact(*executorPath)
-	executorUris = append(executorUris, &mesos.CommandInfo_URI{Value: uri, Executable: proto.Bool(true)})
-
-	// forward the value of the scheduler's -v flag to the executor
-	v := 0
-	if f := flag.Lookup("v"); f != nil && f.Value != nil {
-		if vstr := f.Value.String(); vstr != "" {
-			if vi, err := strconv.ParseInt(vstr, 10, 32); err == nil {
-				v = int(vi)
-			}
-		}
-	}
-	executorCommand := fmt.Sprintf("./%s -logtostderr=true -v=%d -slow_tasks=%v", executorCmd, v, *slowTasks)
-
-	go http.ListenAndServe(fmt.Sprintf("%s:%d", *address, *artifactPort), nil)
-	log.V(2).Info("Serving executor artifacts...")
-
-	// Create mesos scheduler driver.
-	return &mesos.ExecutorInfo{
-		ExecutorId: util.NewExecutorID("default"),
-		Name:       proto.String("Test Executor (Go)"),
-		Source:     proto.String("go_test"),
-		Command: &mesos.CommandInfo{
-			Value: proto.String(executorCommand),
-			Uris:  executorUris,
-		},
-		Resources: []*mesos.Resource{
-			util.NewScalarResource("cpus", CPUS_PER_EXECUTOR),
-			util.NewScalarResource("mem", MEM_PER_EXECUTOR),
-		},
-	}
-}
-
-*/
 func parseIP(address string) net.IP {
 	addr, err := net.LookupIP(address)
 	if err != nil {

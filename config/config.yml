@@ -1,7 +1,7 @@
 logging:
-  filename: /Users/liujian/code/zeus/log/server.log
-  errfilename: /Users/liujian/code/zeus/log/server_err.log
-  maxsize: 100000
+  filename: /root/lj/zeus/log/server.log
+  errfilename: /root/lj/zeus/log/server_err.log
+  maxsize: 10000000
   maxrolls: 5
   level: debug
 
@@ -19,17 +19,17 @@ httpserver:
   port: 9999
 
 scheduler:
-  master: 127.0.0.1:5050
-  address: 127.0.0.1
+  master: 42.81.11.2:5050
+  address: 42.81.11.2
   authprincipal: zeus
-  authsecretfile: /Users/liujian/code/zeus/config/zeus.secret
+  authsecretfile: /mesos/share/mesos/conf/zeus.secret
 
 intervals:
   get_docker_containers_info: 10
   get_docker_images_info: 10
 
 dbserver:
-  switch: on
+  switch: off
   log_sql_execute_time_switch: on
   conn_check_interval: 5
   dbitems:
