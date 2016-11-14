@@ -1,0 +1,50 @@
+logging:
+  filename: /Users/liujian/code/zeus/log/server.log
+  errfilename: /Users/liujian/code/zeus/log/server_err.log
+  maxsize: 100000
+  maxrolls: 5
+  level: debug
+
+daemon:
+  switch: off
+
+pprof:
+  switch: off
+  ip: 0.0.0.0
+  port: 22222
+
+httpserver:
+  switch: on
+  ip: 0.0.0.0
+  port: 9999
+
+scheduler:
+  master: 127.0.0.1:5050
+  address: 127.0.0.1
+  authprincipal: zeus
+  authsecretfile: /Users/liujian/code/zeus/config/zeus.secret
+
+intervals:
+  get_docker_containers_info: 10
+  get_docker_images_info: 10
+
+dbserver:
+  switch: on
+  log_sql_execute_time_switch: on
+  conn_check_interval: 5
+  dbitems:
+    - DBName: mysql1
+      DriverName: mysql
+      DataSourceName: root:mysql@tcp(10.1.63.78:3306)/eop
+      MaxIdleConns: 10
+      MaxOpenConns: 10
+    - DBName: mysql2
+      DriverName: mysql
+      DataSourceName: root:mysql@tcp(10.1.63.78:3306)/eop
+      MaxIdleConns: 10
+      MaxOpenConns: 10
+    - DBName: sqlite3
+      DriverName: sqlite3
+      DataSourceName: /home/eop/lj/goserver/bin/a.db
+      MaxIdleConns: 10
+      MaxOpenConns: 10
